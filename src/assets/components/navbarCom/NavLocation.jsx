@@ -1,10 +1,57 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { BiSearch } from 'react-icons/bi'
 import { MdLocationOn, MdOutlineEventNote } from 'react-icons/md'
 import { RiStickyNoteAddLine } from 'react-icons/ri'
 import { RxCross2 } from 'react-icons/rx'
+import { searchCitiesAPI } from '../../../services/allAPI'
+import { toast } from 'react-toastify'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 function NavLocation() {
+
+  const [citySearchName,setCitySearchName]=useState("")
+  const [cityResults,setCityResults]=useState([])
+  const Navigate = useNavigate()
+  const [selectedCity,setselectedCity]=useState(sessionStorage.getItem("selectedCity")? sessionStorage.getItem("selectedCity") : "select city")
+
+  const addNewCity= async(e)=> {
+    e.preventDefault()
+    console.log("addNewCity");
+
+        try {
+          const result = await searchCitiesAPI({"cityName":citySearchName})
+          if (result.status === 200) {
+
+            // success
+            setCityResults(result.data)
+
+
+
+          }else{
+            console.error(result.response.data)
+          }
+
+        } catch (error) {
+          console.log(error);
+        }
+
+  }
+
+  function handleAddNewCity(){
+    document.getElementById('modal').classList.toggle('hidden')
+    Navigate('/addnewcity')
+  }
+
+  function handleSelectCity(cityname,_id) {
+    sessionStorage.setItem("selectedCity",cityname)
+    sessionStorage.setItem("selectedCityId",_id)
+    setselectedCity(cityname)
+    document.getElementById('modal').classList.toggle('hidden')
+    Navigate(0)
+  }
+
+
+
   return (
     <>
 
@@ -18,53 +65,35 @@ function NavLocation() {
 
       <div className="flex w-full justify-center">
 
-      <input type="text" className='rounded-s-full py-3 outline-none ps-3 md:w-[40vw] w-[80vw] text-sm' placeholder='kochi , mumbai , delhi ....' />
-      <button className='bg-secondary p-2 rounded-e-full px-4'>
+      <input value={citySearchName} onChange={(e)=>setCitySearchName(e.target.value)} type="text" className='rounded-s-full py-3 outline-none ps-3 md:w-[40vw] w-[80vw] text-sm' placeholder='kochi , mumbai , delhi ....' />
+      <button onClick={(e)=>addNewCity(e)} className='bg-secondary p-2 rounded-e-full px-4'>
         <BiSearch className='text-white'/>
       </button>
       </div>
 
       <div className=' mt-5 overflow-y-scroll w-[80%] flex flex-col items-center gap-3 px-5 transition-all '>
 
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Add New City</p>
-          </div>
 
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Kochi</p>
-          </div>
 
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Kochi</p>
-          </div>
 
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Kochi</p>
-          </div>
 
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Kochi</p>
-          </div>
+         { cityResults.length>0?cityResults.map((city)=>(
 
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Kochi</p>
+         <div onClick={()=>handleSelectCity(city.cityName,city._id)} key={city._id} className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
+            <p className='text-secondary font-semibold'>{city.cityName}</p>
           </div>
+         )):(
+          <>
+          <p className='text-info font-semibold'>no result found</p>
+          <div onClick={handleAddNewCity} className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
+          <p className='text-secondary font-semibold'>Add New City</p>
+        </div>
+        </>
 
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Kochi</p>
-          </div>
+         )
+         }
 
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Kochi</p>
-          </div>
 
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Kochi</p>
-          </div>
-
-          <div className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
-            <p className='text-secondary font-semibold'>Kochi</p>
-          </div>
 
       </div>
 
@@ -75,7 +104,7 @@ function NavLocation() {
 
 
     <div className='flex items-center gap-2 rounded-full bg-primary p-1 px-2 w-full md:w-auto '>
-        <button className=' rounded-full p-2  text-xl flex md:flex-row justify-end items-center gap-2 text-white px-2 w-full 'onClick={()=>document.getElementById('modal').classList.toggle('hidden')} > <span className='text-xs font-semibold ' >Kochi</span>   <MdLocationOn/> </button>
+        <button className=' rounded-full p-2  text-xl flex md:flex-row justify-end items-center gap-2 text-white px-2 w-full 'onClick={()=>document.getElementById('modal').classList.toggle('hidden')} > <span className='text-xs font-semibold ' >{selectedCity}</span>   <MdLocationOn/> </button>
     </div>
 
     </>

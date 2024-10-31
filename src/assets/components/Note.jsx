@@ -1,12 +1,27 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import useravatar from '../images/useravatar2.svg'
 import { HiHeart } from 'react-icons/hi'
 import { FaRegHeart } from 'react-icons/fa6'
 import { FiAlertTriangle } from 'react-icons/fi'
 import { IoPaperPlaneOutline } from 'react-icons/io5'
 import { BiMessageSquare, BiMessageSquareAdd } from 'react-icons/bi'
+import { useNavigate, useParams } from 'react-router-dom'
 
-function Note() {
+function Note({noteId,circleId}) {
+
+  let { noteid } = useParams();
+  const navigate=useNavigate()
+
+  useEffect(()=>{
+
+    noteid&&noteid==noteId?document.getElementById('modalNote').classList.remove('hidden'):""
+
+  })
+
+
+
+
+
   return (
 
    <>
@@ -16,7 +31,7 @@ function Note() {
       <div className="w-full bg-info rounded-lg flex flex-col p-5">
         <div className="flex gap-2 items-center">
           <img src={useravatar} alt="" />
-          <p className='text-sm font-semibold'>Username</p>
+          <p className='text-sm font-semibold'>username</p>
         </div>
 
 
@@ -29,7 +44,10 @@ function Note() {
             <FaRegHeart className='text-xl'/>
             <div className='flex gap-3'>
 
-            <button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={()=>document.getElementById('reportbox').classList.toggle('hidden')}>
+            <button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={() => {
+
+              document.getElementById('reportbox').classList.toggle('hidden');
+  }}>
                 <FiAlertTriangle className='text-xl' />
                   Report
             </button>

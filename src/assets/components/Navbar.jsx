@@ -4,10 +4,17 @@ import userAvatar from '../images/userAvatar.svg'
 import Navlogo from './navbarCom/Navlogo'
 import NavMenu from './navbarCom/NavMenu'
 import NavLocation from './navbarCom/NavLocation'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+
 function Navbar() {
+  const navigate = useNavigate();
 
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+  function SignOut() {
+    sessionStorage.clear()
+    navigate(0);
+  }
 
 
   useEffect(() => {
@@ -46,7 +53,7 @@ function Navbar() {
             </div>
             <ul tabIndex={0} className="dropdown-content menu bg-secondary rounded-box z-[1] w-52 p-2 shadow text-info font-semibold">
               <li> <Link to="/userpage/123">Profile</Link> </li>
-              <li><a>SignOut</a></li>
+              <li onClick={SignOut} ><a>SignOut</a></li>
             </ul>
           </div>
         </div>
@@ -66,7 +73,7 @@ function Navbar() {
             </div>
             <ul tabIndex={0} className="dropdown-content menu bg-secondary rounded-box z-[1] w-52 p-2 shadow text-info font-semibold">
               <li> <Link to="/userpage/123">Profile</Link> </li>
-              <li><a>SignOut</a></li>
+              <li onClick={SignOut} ><a>SignOut</a></li>
             </ul>
           </div>
         </div>
