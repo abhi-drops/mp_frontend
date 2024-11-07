@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import useravatar from '../images/useravatar2.svg'
 import { HiHeart } from 'react-icons/hi'
 import { FaRegHeart } from 'react-icons/fa6'
@@ -6,19 +6,158 @@ import { FiAlertTriangle } from 'react-icons/fi'
 import { IoPaperPlaneOutline } from 'react-icons/io5'
 import { BiMessageSquare, BiMessageSquareAdd } from 'react-icons/bi'
 import { useNavigate, useParams } from 'react-router-dom'
+import { addNoteCommentAPI, addNoteLikeAPI, getNoteDataAPI } from '../../services/allAPI'
+import UserContext from '../ContextAPI/UserContext'
+import { toast } from 'react-toastify'
+import { BsHeartFill } from 'react-icons/bs'
+import UserAvatarComponent from './UserAvatarComponent'
 
 function Note({noteId,circleId}) {
+
+  const [userResponse, setuserResponse] = useContext(UserContext);
+
+
 
   let { noteid } = useParams();
   const navigate=useNavigate()
 
-  useEffect(()=>{
+  const [newComment,setNewComment]=useState("")
 
-    noteid&&noteid==noteId?document.getElementById('modalNote').classList.remove('hidden'):""
+  const [noteData,setNoteData]=useState({})
 
-  })
+  const [like,setLike]=useState(false)
 
 
+  useEffect(() => {
+
+
+    if (noteid && noteid === noteId) {
+      document.getElementById(`modalNote-${noteId}`)?.classList.remove('hidden');
+      getNoteData();
+    }
+  }, [noteid, noteId]);
+
+ // Include both dependencies to trigger re-render if either changes
+
+
+ useEffect(()=>{
+
+  userResponse?._id ? setLike(noteData.noteLikedUsers?.includes(userResponse?._id)):""
+  console.log("like:",like);
+
+
+ },[noteData])
+
+
+  const getNoteData = async () => {
+
+    try {
+      const result = await getNoteDataAPI(noteid);
+      console.log("Get Note Data Result:", result.data);
+      if (result.status === 200) {
+        setNoteData(result.data)
+
+
+
+      } else {
+        console.log("Get Note Data Error:", result.response.data);
+      }
+    } catch (err) {
+      console.log("Get Note Data Catch Error:", err);
+    }
+
+};
+
+//   const addNoteLike = async () => {
+
+//     try {
+//       const result = await getNoteDataAPI(noteid);
+//       console.log("Get Note Data Result:", result.data);
+//       if (result.status === 200) {
+//         setNoteData(result.data)
+
+
+
+//       } else {
+//         console.log("Get Note Data Error:", result.response.data);
+//       }
+//     } catch (err) {
+//       console.log("Get Note Data Catch Error:", err);
+//     }
+
+// };
+
+
+
+const replay = (username) =>{
+  setNewComment(`@${username} `)
+}
+
+
+
+const handleAddComment = async (e) => {
+
+  e.preventDefault();
+
+  console.log(userResponse);
+
+
+  if (!newComment) {
+    toast.info("Please fill in the missing fields");
+    return;
+  }
+
+  const reqBody = new FormData();
+  reqBody.append("commentedUserName", userResponse.userName);
+  reqBody.append("commentedUserPic", userResponse.userPic);
+  reqBody.append("commentedText", newComment);
+
+
+  const token = sessionStorage.getItem("token");
+  if (token) {
+    const reqHeader = {
+      "authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+
+    try {
+      const result = await addNoteCommentAPI(noteid, reqBody, reqHeader);
+      if (result.status === 200) {
+        toast.success("comment added successfully")
+      } else {
+        toast.warn(result.response.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+
+const handleLikeNote = async (e) => {
+
+  e.preventDefault();
+
+
+  const token = sessionStorage.getItem("token");
+  if (token) {
+    const reqHeader = {
+      "authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+
+    try {
+      const result = await addNoteLikeAPI(noteid,reqHeader);
+      if (result.status === 200) {
+        setLike(!like)
+        console.log("Liked/unliked successfully")
+      } else {
+        toast.warn(result.response.data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
 
 
 
@@ -28,20 +167,26 @@ function Note({noteId,circleId}) {
 
    {/* note  */}
 
-      <div className="w-full bg-info rounded-lg flex flex-col p-5">
+      <div className="w-full bg-info rounded-lg flex flex-col p-5 ">
         <div className="flex gap-2 items-center">
-          <img src={useravatar} alt="" />
-          <p className='text-sm font-semibold'>username</p>
+          {/* <img src={useravatar} alt="" /> */}
+          <UserAvatarComponent seed={noteData?.noteCreatorId?.userPic}/>
+          <p className='text-sm font-semibold'>{noteData?noteData.noteCreatorId?.userName : getNoteData()}</p>
         </div>
 
 
-          <p className='text-sm font-semibold text-secondary mt-4'>LOREM HEADER ONE LOREM HEADER ONE  LOREM HEADER ONE </p>
+          <p className='text-sm font-semibold text-secondary mt-4'>{noteData?.noteTitle} </p>
 
-          <p className='text-sm  text-secondary mt-4'>simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. </p>
+          <p className='text-sm  text-secondary mt-4'>{noteData?.noteDes} </p>
 
 
           <div className="w-full flex justify-between mt-5 items-center">
-            <FaRegHeart className='text-xl'/>
+
+             <div onClick={e=>handleLikeNote(e)}>
+               {like?<BsHeartFill className='text-xl text-red-500 hover:scale-110 transition-all' />
+               :<FaRegHeart className='text-xl'/>}
+             </div>
+
             <div className='flex gap-3'>
 
             <button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={() => {
@@ -84,11 +229,11 @@ function Note({noteId,circleId}) {
 
 
           <div className='bg-info w-full rounded-lg flex flex-col gap-3 mt-5 p-3'>
-            <textarea name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='add comments...'></textarea>
+            <textarea name="" value={newComment} onChange={e=>setNewComment(e.target.value)} id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='add comments...'></textarea>
 
             <div className="flex w-full justify-end">
 
-              <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center'>
+              <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={(e)=>handleAddComment(e)} >
                     <BiMessageSquareAdd className='text-xl'/>
                     Send
               </button>
@@ -97,25 +242,29 @@ function Note({noteId,circleId}) {
           </div>
 
 
-          {/* comments  */}
 
-          <div className="w-full bg-info rounded-lg flex flex-col p-5 mt-5">
-            <div className="flex gap-2 items-center">
+          {/* comments  */}
+            { noteData.noteComments?.map(((comment,index)=>{
+              return(
+          <div key={index} className="w-full bg-info rounded-lg flex flex-col p-5 mt-5">
+
+                <div  className="flex gap-2 items-center">
               <img src={useravatar} alt="" />
-              <p className='text-sm font-semibold'>Username</p>
+              <p className='text-sm font-semibold'>{comment.commentedUserName}</p>
             </div>
 
 
 
 
-              <p className='text-sm  text-secondary mt-4'><span className='font-semibold'>@username</span> simply dummy text of the printing and typesetting industry. </p>
+
+              <p className='text-sm  text-secondary mt-4'><span className='font-semibold'></span> {comment.commentedText} </p>
 
 
               <div className="w-full flex justify-between mt-5 items-center">
-                <FaRegHeart className='text-xl'/>
+                <p> </p>
                 <div className='flex gap-3'>
 
-                <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center'>
+                <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={()=>replay(comment.commentedUserName)}>
                     <BiMessageSquareAdd className='text-xl'/>
                     Replay
               </button>
@@ -123,6 +272,9 @@ function Note({noteId,circleId}) {
                 </div>
               </div>
             </div>
+              )
+            }))
+          }
 
 
 

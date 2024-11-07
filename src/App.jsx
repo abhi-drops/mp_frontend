@@ -40,7 +40,7 @@ function App() {
     return isAuthenticated() ? element : <Navigate to="/login" />;
   };
 
-  
+
 
 
 
@@ -55,7 +55,7 @@ function App() {
         <Route path='/circle/:id' element={<PrivateRoute element={<Circle />} />} />
         <Route path='/circle/:id/:noteid' element={<PrivateRoute element={<Circle />} />} />
         <Route path='/events' element={<PrivateRoute element={<Events />} />} />
-        <Route path='/events/:id' element={<PrivateRoute element={<Events />} />} />
+        <Route path='/events/:eventid' element={<PrivateRoute element={<Events />} />} />
         <Route path='/emergencies' element={<PrivateRoute element={<Emergencies />} />} />
         <Route path='/emergencies/:id' element={<PrivateRoute element={<Emergencies />} />} />
         <Route path='/userpage/:id' element={<PrivateRoute element={<UserPage />} />} />

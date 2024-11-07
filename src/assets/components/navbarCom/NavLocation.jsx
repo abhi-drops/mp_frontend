@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { BiSearch } from 'react-icons/bi'
 import { MdLocationOn, MdOutlineEventNote } from 'react-icons/md'
 import { RiStickyNoteAddLine } from 'react-icons/ri'
@@ -6,6 +6,7 @@ import { RxCross2 } from 'react-icons/rx'
 import { searchCitiesAPI } from '../../../services/allAPI'
 import { toast } from 'react-toastify'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import UserContext from '../../ContextAPI/UserContext'
 
 function NavLocation() {
 
@@ -13,6 +14,7 @@ function NavLocation() {
   const [cityResults,setCityResults]=useState([])
   const Navigate = useNavigate()
   const [selectedCity,setselectedCity]=useState(sessionStorage.getItem("selectedCity")? sessionStorage.getItem("selectedCity") : "select city")
+  const [userResponse, setuserResponse] = useContext(UserContext);
 
   const addNewCity= async(e)=> {
     e.preventDefault()
@@ -88,6 +90,23 @@ function NavLocation() {
           <div onClick={handleAddNewCity} className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
           <p className='text-secondary font-semibold'>Add New City</p>
         </div>
+
+        <p className=' font-semibold text-info '>are you looking for...</p>
+
+          {userResponse?.userCities?.length > 0 &&
+
+            userResponse?.userCities?.map((city)=>(
+
+
+
+              <div onClick={()=>handleSelectCity(city.cityName,city._id)} key={city._id} className='w-full py-3 px-3 flex justify-center items-center rounded-lg bg-info cursor-pointer hover:py-5 transition-all '>
+              <p className='text-secondary font-semibold'>{city.cityName}</p>
+            </div>
+
+            ))
+
+
+          }
         </>
 
          )

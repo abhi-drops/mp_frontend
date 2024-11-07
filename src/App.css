@@ -27,3 +27,19 @@
   }
 
 }
+
+.userAvtr, .circleAvatar {
+  width: 48px; /* Adjust size as needed */
+  height: 48px;
+  border-radius: 50%; /* Ensures it's a perfect circle */
+  overflow: hidden;
+  display: flex; /* Centers the avatar if necessary */
+  align-items: center;
+  justify-content: center;
+}
+
+.userAvtr img, .circleAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Keeps the image within circle bounds */
+}

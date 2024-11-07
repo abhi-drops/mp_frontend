@@ -17,9 +17,6 @@ import { Link } from "react-router-dom";
 function MyCircles() {
   const [userResponse, setuserResponse] = useContext(UserContext);
   console.log("User Response:", userResponse);
-  const [newCircleIconSeed, setNewCircleIconSeed] = useState(
-    Math.floor(100000 + Math.random() * 900000)
-  );
   const [newCircleName, setNewCircleName] = useState("");
 
   const [circleSearchName,setCircleSearchName]=useState("")
@@ -27,6 +24,9 @@ function MyCircles() {
 
   const[updatedUser,setUpdateUser]=useState(false)
 
+  const [newCircleIconSeed, setNewCircleIconSeed] = useState(
+    Math.floor(100000 + Math.random() * 900000)
+  );
 
   async function randomizeCircleIcon() {
     setNewCircleIconSeed(Math.floor(100000 + Math.random() * 900000));
@@ -261,35 +261,36 @@ function MyCircles() {
 
           <div className=" bg-gradient-to-b from-primary to-transparent w-full h-5 relative top-6 "></div>
 
-          {/* cards group*/}
-          <div className="w-[100%] h-[82%]  mt-2 xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 grid gap-3 overflow-y-scroll pt-5  ">
-            {userResponse.userCircles.map((circle, index) => {
-              if (
-                circle.circleCityId == sessionStorage.getItem("selectedCityId")
-              ) {
-                return (
-                  <>
-                    <Link to={`/circle/${circle._id}`}>
-                    <CardCircle
-                      key={index}
-                      name={circle.circleName}
-                      circlePic={circle.circlePic}
-                      userno={circle.circleMembers?.length}
-                    />
-                    </Link>
-                  </>
-                );
-              } else {
-                return null;
-              }
-            })}
 
-{
+          {/* Cards Group */}
+<div className="w-[100%] h-[82%] mt-2 xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 grid gap-3 overflow-y-scroll pt-5">
+  {sessionStorage.getItem("selectedCityId") ? (
+    userResponse.userCircles.filter(
+      (circle) => circle.circleCityId === sessionStorage.getItem("selectedCityId")
+    ).length > 0 ? (
+      userResponse.userCircles.filter(
+        (circle) => circle.circleCityId === sessionStorage.getItem("selectedCityId")
+      ).map((circle) => (
+        <Link to={`/circle/${circle._id}`} key={circle._id}>
+          <CardCircle
+            name={circle.circleName}
+            circlePic={circle.circlePic}
+            userno={circle.circleMembers?.length}
+          />
+        </Link>
+      ))
+    ) : (
+      <p className="w-[100%] font-bold text-xl text-info opacity-40">
+        No circles found for the selected city.
+      </p>
+    )
+  ) : (
+    <p className="w-[100%] font-bold text-xl text-info opacity-40">
+      Select a city to view the circles
+    </p>
+  )}
+</div>
 
-sessionStorage.getItem("selectedCityId")?"":<p className="w-[100%] font-bold text-xl text-info opacity-40"> select a city to view the circles </p>
-}
-
-          </div>
 
         </div>
       </div>

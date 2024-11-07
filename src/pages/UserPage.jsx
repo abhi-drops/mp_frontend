@@ -13,12 +13,48 @@ import { CgUserList } from 'react-icons/cg';
 import { IoPaperPlane, IoPaperPlaneOutline } from 'react-icons/io5';
 import { FiAlertTriangle } from 'react-icons/fi';
 import { RxCross2 } from 'react-icons/rx';
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { BiMessageSquareAdd } from 'react-icons/bi'
+import { editCircleNoteAPI, editEventNoteAPI, editUserDataAPI, followUserAPI, getUserDataAPI } from '../services/allAPI'
+import UserAvatarComponent from '../assets/components/UserAvatarComponent'
+import { Flip, toast, ToastContainer } from "react-toastify";
 
 function UserPage() {
 
+  let { id } = useParams();
+
+  const[userData,setUserData]=useState({})
+
+
+
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+
+  const [newUserIconSeed, setNewUserIconSeed] = useState(
+    userData?.userPic
+  );
+
+  const[newBio,setNewBio]=useState("")
+  const[newInst,setNewInst]=useState("")
+  const[newFB,setNewFB]=useState("")
+
+  const[lastEditNoteId,setLastEditNoteId]=useState("")
+  const[lastEditEventId,setLastEditEventId]=useState("")
+
+  const [newEvent,setNewEvent]=useState({
+    "eventTitle":"" ,
+    "eventDes":"",
+    "eventDate":""
+  })
+
+  const [newNote,setNewNote]=useState({
+    "noteTitle":"" ,
+    "noteDes":"",
+  })
+
+  async function randomizeAvatarIcon() {
+    setNewUserIconSeed(Math.floor(100000 + Math.random() * 900000));
+  }
 
 
   useEffect(() => {
@@ -37,6 +73,213 @@ function UserPage() {
       window.removeEventListener('resize', handleResize);
     };
   }, []);
+
+
+  // useEffect(()=>{
+  //   id&&console.log("id:",id);
+
+  //   getUserData();
+  //   console.log("userData:",userData);
+
+  // },[id])
+
+
+  useEffect(() => {
+    if (id) {
+      console.log("id:", id); // Check if `id` is printed correctly
+      getUserData(id);
+
+      setNewUserIconSeed(userData.userPic)// Pass `id` to `getUserData`
+
+
+    } else {
+      console.log("No id found in URL");
+    }
+  }, [id]);
+
+  const getUserData = async (userId) => {
+    const reqBody = { "fetchUserId"  : userId }; // Using a plain object
+    console.log("reqBody:", reqBody);  // Check the body
+
+
+
+    const token = sessionStorage.getItem("token");
+    console.log("Token:", token);
+
+    if (token) {
+      const reqHeader = {
+        authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+      try {
+        console.log("fetchUserId:", userId);
+        const result = await getUserDataAPI({"fetchUserId"  : userId}, reqHeader);
+        console.log("Get User Data Result:", result);
+        if (result.status === 200) {
+          setUserData(result.data);
+        } else {
+          console.log("Get User Data Error:", result.response.data);
+        }
+      } catch (err) {
+        console.log("Get User Data Catch Error:", err);
+      }
+    }
+  };
+
+  const handleEditUser = async (e) => {
+    e.preventDefault();
+
+      const reqBody = new FormData();
+      reqBody.append("userPic", newUserIconSeed);
+      reqBody.append("userBio", newBio);
+      reqBody.append("userInst", newInst);
+      reqBody.append("userFB", newFB);
+
+      const token = sessionStorage.getItem("token");
+      console.log("Token:", token);
+      if (token) {
+        const reqHeader = {
+          "authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
+        try {
+          const result = await editUserDataAPI(reqBody, reqHeader);
+          console.log("Edit Profile Result:", result);
+          if (result.status === 200) {
+            toast.success("Profile edited Successfully");
+            document.getElementById("modalEB").classList.toggle("hidden");
+          } else {
+            console.log("Edit Profile Error:", result.response.data);
+          }
+        } catch (err) {
+          console.log("Edit Profile Catch Error:", err);
+        }
+      }
+
+  };
+
+
+  // edit btn press functions
+
+
+  function pressEditNoteBtn(e,id){
+    e.preventDefault();
+    //
+    setLastEditNoteId(id)
+    document.getElementById('modalN').classList.toggle('hidden')
+  }
+
+  function pressEditEventBtn(e,id){
+    e.preventDefault();
+    //
+    setLastEditEventId(id)
+    document.getElementById('modalEN').classList.toggle('hidden')
+  }
+
+
+  // handle edit functions...
+
+  const handleEditEventNote = async (e) => {
+
+    e.preventDefault();
+
+    const reqBody = new FormData();
+        reqBody.append("eventTitle", newEvent.eventTitle);
+        reqBody.append("eventDes", newEvent.eventDes);
+        reqBody.append("eventDate", newEvent.eventDate);
+
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      const reqHeader = {
+        "authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      try {
+        const result = await editEventNoteAPI(lastEditEventId,reqBody,reqHeader);
+        if (result.status === 200) {
+          setNewEvent({
+            "eventTitle":"" ,
+            "eventDes":"",
+            "eventDate":""
+          })
+          console.log("event edited successfully")
+        } else {
+          toast.warn(result.response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+
+  const handleEditCircleNote = async (e) => {
+
+    e.preventDefault();
+
+    const reqBody = new FormData();
+        reqBody.append("noteTitle", newNote.noteTitle);
+        reqBody.append("noteDes", newNote.noteDes);
+
+
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      const reqHeader = {
+        "authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      try {
+        const result = await editCircleNoteAPI(lastEditNoteId,reqBody,reqHeader);
+        if (result.status === 200) {
+          setNewNote({
+            "noteTitle":"" ,
+            "noteDes":"",
+          })
+          console.log("note edited successfully")
+        } else {
+          toast.warn(result.response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+
+
+  const handlefollowUser = async (e) => {
+
+    e.preventDefault();
+
+    const reqBody = new FormData();
+        reqBody.append("targetUserId", id);
+
+
+
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      const reqHeader = {
+        "authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      try {
+        const result = await followUserAPI(reqBody,reqHeader);
+        if (result.status === 200) {
+          toast.success("user followed/unfollowed successfully")
+          getUserData(id)
+        } else {
+          toast.warn(result.response.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+
 
 
   return (
@@ -84,44 +327,17 @@ function UserPage() {
               <div role="tabpanel" className="tab-content bg-secondary border-secondary rounded-box p-6 h-[65vh]">
                 <div className=" overflow-y-scroll h-full">
 
-                <div className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
-                    <img src={avatar} alt="" />
-                    <p className=' font-semibold text-secondary'>Username</p>
-                </div>
-
-                <div className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
-                    <img src={avatar} alt="" />
-                    <p className=' font-semibold text-secondary'>Username</p>
-                </div>
-
-                <div className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
-                    <img src={avatar} alt="" />
-                    <p className=' font-semibold text-secondary'>Username</p>
-                </div>
-
-                <div className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
-                    <img src={avatar} alt="" />
-                    <p className=' font-semibold text-secondary'>Username</p>
-                </div>
-
-                <div className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
-                    <img src={avatar} alt="" />
-                    <p className=' font-semibold text-secondary'>Username</p>
-                </div>
-
-                <div className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
-                    <img src={avatar} alt="" />
-                    <p className=' font-semibold text-secondary'>Username</p>
-                </div>
-
-                <div className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
-                    <img src={avatar} alt="" />
-                    <p className=' font-semibold text-secondary'>Username</p>
-                </div>
-
-
-
-
+                {userData?.userFollowers?.map((user)=>{
+                  return(
+                    <Link key={user?._id} to={`/userpage/${user?._id}`}>
+                    <div  className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
+                    {/* <img src={avatar} alt="" /> */}
+                    <UserAvatarComponent seed={user?.userPic}/>
+                    <p className=' font-semibold text-secondary'>{user?.userName}</p>
+                  </div>
+                  </Link>
+                  )
+                })}
 
                 </div>
               </div>
@@ -133,18 +349,21 @@ function UserPage() {
                 className="tab font-semibold text-info [--tab-bg:#13413B] [--tab-border-color:#13413B]"
                 aria-label="Folowing"
                 defaultChecked />
+
               <div role="tabpanel" className="tab-content bg-secondary border-secondary rounded-box p-6 h-[65vh]">
                 <div className=" overflow-y-scroll h-full">
 
-                <div className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
-                    <img src={avatar} alt="" />
-                    <p className=' font-semibold text-secondary'>Username</p>
-                </div>
-
-
-
-
-
+                {userData?.userFollowing?.map((user)=>{
+                  return(
+                  <Link key={user?._id} to={`/userpage/${user?._id}`}>
+                    <div  className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
+                    {/* <img src={avatar} alt="" /> */}
+                    <UserAvatarComponent seed={user?.userPic}/>
+                    <p className=' font-semibold text-secondary'>{user?.userName}</p>
+                  </div>
+                  </Link>
+                  )
+                })}
 
 
                 </div>
@@ -209,31 +428,37 @@ function UserPage() {
 
                         {/* link */}
                         <div className='bg-info w-full rounded-lg flex flex-col gap-3  p-3'>
-                        <input name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='FaceBook Link'/>
+                        <input value={newFB} onChange={e=>setNewFB(e.target.value)} name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='FaceBook Link'/>
                         </div>
 
                         {/* link */}
                         <div className='bg-info w-full rounded-lg flex flex-col gap-3 mt-3 p-3'>
-                        <input name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='Instagram Link'/>
+                        <input value={newInst} onChange={e=>setNewInst(e.target.value)} name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='Instagram Link'/>
                         </div>
 
                       </div>
 
-                      <label htmlFor="pp" className='md:w-[10vw] md:h-[8vw] w-[50vw] h-[50vw]' >
-                        <img src={avatar2} alt="" className='w-full h-full object-cover rounded-full' />
+                      <label htmlFor="pp" className='flex flex-col justify-center items-center gap-5' >
+
+                        <UserAvatarComponent size={"md"} seed={newUserIconSeed}/>
+
+                        <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={()=>randomizeAvatarIcon()} >
+                         <p className='text-xs'>Randomize Avatar</p>
+                      </button>
+
                       </label>
 
-                      <input type="file" name="" id="pp" hidden />
+
 
                 </div>
 
                 {/* add Bio */}
                 <div className='bg-info w-full rounded-lg flex flex-col gap-3 mt-5 p-3'>
-                  <textarea name="" id="" className='w-full outline-none bg-transparent rounded-lg h-72 ' placeholder='add Bio...'></textarea>
+                  <textarea value={newBio} onChange={e=>setNewBio(e.target.value)} name="" id="" className='w-full outline-none bg-transparent rounded-lg h-52 ' placeholder='add Bio...'></textarea>
 
                   <div className="flex w-full justify-end">
 
-                    <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center'>
+                    <button onClick={e=>handleEditUser(e)} className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center'>
                     <RiStickyNoteAddLine className='text-xl'/>
                           Save
                     </button>
@@ -298,22 +523,22 @@ function UserPage() {
                 <p className='text-2xl text-info font-semibold mt-10'>Edit Event Note </p>
 
                 <div className='bg-info w-full rounded-lg flex flex-col gap-3 mt-5 p-3'>
-                  <input type='text' name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='add Heading...'/>
+                  <input type='text' name="" id="" value={newEvent.eventTitle} onChange={e=>setNewEvent({...newEvent, eventTitle: e.target.value})} className='w-full outline-none bg-transparent rounded-lg ' placeholder='add Heading...'/>
                 </div>
 
                 <div className='bg-info w-full rounded-lg flex flex-col gap-3 mt-5 p-3 ' >
                 <p className='text-xl text-success font-semibold'>Event Date </p>
-                  <input type='date' name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='add Heading...'/>
+                  <input type='date' value={newEvent.eventDate} onChange={e=>setNewEvent({...newEvent, eventDate: e.target.value})} name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='add Heading...'/>
                 </div>
 
 
                 {/* add content */}
                 <div className='bg-info w-full rounded-lg flex flex-col gap-3 mt-5 p-3'>
-                  <textarea name="" id="" className='w-full outline-none bg-transparent rounded-lg h-52 ' placeholder='add Details...'></textarea>
+                  <textarea name="" id="" value={newEvent.eventDes} onChange={e=>setNewEvent({...newEvent, eventDes: e.target.value})} className='w-full outline-none bg-transparent rounded-lg h-52 ' placeholder='add Details...'></textarea>
 
                   <div className="flex w-full justify-end">
 
-                    <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center'>
+                    <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={(e)=>handleEditEventNote(e)}>
                     <RiStickyNoteAddLine className='text-xl'/>
                           Add Post
                     </button>
@@ -341,16 +566,16 @@ function UserPage() {
 
               {/* heading */}
               <div className='bg-info w-full rounded-lg flex flex-col gap-3 mt-5 p-3'>
-                <input name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='add Heading...'/>
+                <input name="" value={newNote.noteTitle} onChange={e=>setNewNote({...newNote,noteTitle:e.target.value})}  id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='add Heading...'/>
               </div>
 
               {/* add content */}
               <div className='bg-info w-full rounded-lg flex flex-col gap-3 mt-5 p-3'>
-                <textarea name="" id="" className='w-full outline-none bg-transparent rounded-lg h-80 ' placeholder='add Details...'></textarea>
+                <textarea name="" id=""  value={newNote.noteDes} onChange={e=>setNewNote({...newNote,noteDes:e.target.value})} className='w-full outline-none bg-transparent rounded-lg h-80 ' placeholder='add Details...'></textarea>
 
                 <div className="flex w-full justify-end">
 
-                  <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center'>
+                  <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={(e)=>handleEditCircleNote(e)}>
                   <RiStickyNoteAddLine className='text-xl'/>
                         Add Post
                   </button>
@@ -362,10 +587,22 @@ function UserPage() {
         </div>
 
 
-
-
         {/* page */}
       <div className="bg-primary w-[100vw]  flex flex-col items-center pb-32" >
+
+      <ToastContainer
+        position="top-left"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Flip}
+      />
 
         {/* user name and image */}
 
@@ -374,12 +611,13 @@ function UserPage() {
         {/* image */}
 
         <div className="flex justify-center items-center bg-primary rounded-full p-3 mt-16">
-          <img src={avatar} alt="" className='w-36' />
+          {/* <img src={avatar} alt="" className='w-36' /> */}
+          <UserAvatarComponent seed={userData.userPic} size={"md"}/>
         </div>
 
         <div className="flex flex-col md:items-center mt-5 w-full items-end p-5 ">
-          <h1 className='text-xl font-semibold text-secondary '>Abhinand A S</h1>
-          <h1 className=' font-semibold text-sm text-secondary opacity-75'>kochi , Kollam , Mumbai</h1>
+          <h1 className='text-xl font-semibold text-secondary '>{userData?.userName}</h1>
+          <h1 className=' font-semibold text-sm text-secondary opacity-75'>{userData?.userCities?.map(city=>` ~ ${city.cityName}`)}</h1>
         </div>
 
         </div>
@@ -392,8 +630,10 @@ function UserPage() {
 
 
           <div className='w-full justify-center items-center h-full flex'>
-            <button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center h-10 w-28'   >
-              <LuUserPlus className='text-base'/> <p className='text-xs'>Follow</p>
+            <button disabled={id && id === "1"}  className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center h-10 w-28 disabled:opacity-30' onClick={(e)=>handlefollowUser(e)}  >
+              <LuUserPlus className='text-base'/> <p className='text-xs'>{userData?.userFollowers?.some(
+  (following) => following.userName === sessionStorage.getItem("username"))?"unfollow":"follow"
+}</p>
             </button>
           </div>
 
@@ -425,22 +665,28 @@ function UserPage() {
 
         <div className='md:w-[30vw] md:h-[18vw] w-[80vw] h-[70vw] bg-info rounded-lg md:p-10 p-5 justify-between flex flex-col'>
 
-            <p className=' text-secondary'>lorem bio bio , just a bio , sample ,bio bio bio bio bio bio and the bio</p>
+            <p className=' text-secondary'>{userData.userBio}</p>
 
             <div className='flex w-full justify-between items-center'>
                 <div className="flex flex-col justify-center items-center">
                   <p className='text-xl font-semibold text-secondary'>follow me on</p>
                   <div className="flex gap-3 items-center w-full justify-start">
+                    <a href={userData?.userInst}>
                     <BsInstagram className='text-xl'/>
+                    </a>
+
+                    <a href={userData?.userFB}>
                     < RiFacebookBoxLine className='text-2xl'/>
+                    </a>
+
                   </div>
                 </div>
 
 
                 <div className=''>
-              <button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center h-10 w-28'  onClick={()=>document.getElementById('modalEB').classList.toggle('hidden')} >
+              {id && id == "1" && (<button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center h-10 w-28'  onClick={()=>document.getElementById('modalEB').classList.toggle('hidden')} >
                 <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
-              </button>
+              </button>)}
             </div>
 
             </div>
@@ -464,43 +710,36 @@ function UserPage() {
         </div>
 
 
-        <div className="flex md:flex-row flex-col justify-center items-start w-full   mt-3 gap-3 ">
+       {id && id == "1" &&
+        (<div className="flex md:flex-row flex-col justify-center items-start w-full   mt-3 gap-3 ">
 
-          <div className='md:w-[25vw] md:max-h-[25vw]
+          <div className='md:w-[25vw] md:min-h-[20vw]
           overflow-y-scroll
            w-full  bg-info md:rounded-lg md:p-10 p-5 justify-between flex flex-col h-full '>
 
-            <p className='text-xl font-semibold text-secondary mb-5'>Alert Notes</p>
+            <p className='text-xl font-semibold text-secondary mb-5'>Circle Notes</p>
 
 
             <div className='w-full flex flex-col gap-3'>
 
-                <div className="bg-secondary w-full  rounded-lg flex flex-col p-4">
-                    <p className='text-sm text-info mb-3 font-semibold'>lorem lortem heading...</p>
-                    <div className='w-full flex justify-end'>
-                      <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={()=>document.getElementById('modalAN').classList.toggle('hidden')} >
-                        <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
-                      </button>
-                    </div>
-                </div>
+                { userData?.userNotes?.map((note)=>{return(
+                  <div key={note._id} className="bg-secondary w-full  rounded-lg flex flex-col p-4">
+                  <p className='text-sm text-info mb-3 font-semibold'>{note.noteTitle}</p>
+                  <div className='w-full flex justify-end'>
+                    <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={(e)=>pressEditNoteBtn(e,note._id)} >
+                      <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
+                    </button>
+                  </div>
+              </div>
+                )})}
 
-
-
-                <div className="bg-secondary w-full rounded-lg flex flex-col p-4">
-                    <p className='text-sm text-info mb-3 font-semibold'>lorem lortem heading...</p>
-                    <div className='w-full flex justify-end'>
-                      <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={()=>document.getElementById('modalAN').classList.toggle('hidden')} >
-                        <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
-                      </button>
-                    </div>
-                </div>
 
             </div>
 
           </div>
 
 
-          <div className='md:w-[25vw]  w-full  bg-info md:rounded-lg md:p-10 p-5 justify-between flex flex-col md:max-h-[25vw]
+          <div className='md:w-[25vw]  w-full  bg-info md:rounded-lg md:p-10 p-5 justify-between flex flex-col md:min-h-[20vw]
           overflow-y-scroll '>
 
             <p className='text-xl font-semibold text-secondary mb-5'>Event Notes</p>
@@ -508,71 +747,31 @@ function UserPage() {
 
             <div className='w-full flex flex-col gap-3'>
 
-                <div className="bg-secondary w-full rounded-lg flex flex-col p-4">
-                    <p className='text-sm text-info mb-3 font-semibold'>lorem lortem heading...</p>
-                    <div className='w-full flex justify-end'>
-                      <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={()=>document.getElementById('modalEN').classList.toggle('hidden')} >
-                        <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
-                      </button>
-                    </div>
-                </div>
 
 
-                <div className="bg-secondary w-full rounded-lg flex flex-col p-4">
-                    <p className='text-sm text-info mb-3 font-semibold'>lorem lortem heading...</p>
-                    <div className='w-full flex justify-end'>
-                      <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={()=>document.getElementById('modalEN').classList.toggle('hidden')} >
-                        <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
-                      </button>
-                    </div>
-                </div>
+               { userData?.userEvents?.map((event)=> {return(
+
+<div key={event._id}  className="bg-secondary w-full rounded-lg flex flex-col p-4">
+<p className='text-sm text-info mb-3 font-semibold'>{event.eventTitle}</p>
+<div className='w-full flex justify-end'>
+  <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={(e)=>pressEditEventBtn(e,event._id)} >
+    <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
+  </button>
+</div>
+</div>
+
+               )})}
+
+
 
             </div>
 
           </div>
 
-        </div>
+        </div>)
+}
 
 
-
-
-        <div className='md:w-[50vw]  w-full  bg-info md:rounded-lg md:p-10 p-5 justify-between flex flex-col md:max-h-[25vw]
-          overflow-y-scroll mt-3'>
-
-            <p className='text-xl font-semibold text-secondary mb-5'>Circle Notes</p>
-
-
-            <div className='w-full flex flex-col gap-3'>
-
-                <div className="bg-secondary w-full rounded-lg flex flex-col p-4">
-                    <p className='text-sm text-info mb-3 font-semibold'>lorem lortem heading...</p>
-                    <div className='w-full flex justify-end'>
-                      <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={()=>document.getElementById('modalN').classList.toggle('hidden')}  >
-                        <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
-                      </button>
-                    </div>
-                </div>
-
-                <div className="bg-secondary w-full rounded-lg flex flex-col p-4">
-                    <p className='text-sm text-info mb-3 font-semibold'>lorem lortem heading...</p>
-                    <div className='w-full flex justify-end'>
-                      <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={()=>document.getElementById('modalN').classList.toggle('hidden')}  >
-                        <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
-                      </button>
-                    </div>
-                </div>
-                <div className="bg-secondary w-full rounded-lg flex flex-col p-4">
-                    <p className='text-sm text-info mb-3 font-semibold'>lorem lortem heading...</p>
-                    <div className='w-full flex justify-end'>
-                      <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center h-10 w-28' onClick={()=>document.getElementById('modalN').classList.toggle('hidden')}  >
-                        <LuPen className='text-base'/> <p className='text-xs'>Edit</p>
-                      </button>
-                    </div>
-                </div>
-
-            </div>
-
-          </div>
 
 
 

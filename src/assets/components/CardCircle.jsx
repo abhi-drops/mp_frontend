@@ -7,7 +7,7 @@ function CardCircle({ name, circlePic , userno }) {
     <>
       <div className="md:w-80 w-full flex items-center p-5 rounded-xl md:h-[17vh] h-[10vh]  font-semibold text-info bg-secondary ">
 
-          <CircleAvatarComponent seed={circlePic} size="lg" /> {/* Add className with value */}
+          <CircleAvatarComponent key={name} seed={circlePic} size="lg" /> {/* Add className with value */}
 
         <div className=" flex flex-col w-full ps-5 h-full justify-center">
           <h4>{name}</h4>

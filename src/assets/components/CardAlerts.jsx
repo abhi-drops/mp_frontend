@@ -5,8 +5,7 @@ import { MdFullscreen } from 'react-icons/md'
 import { RxCross2 } from 'react-icons/rx'
 import CardSearch from './CardSearch'
 
-import Note from './Note'
-import EventNote from './EventNote'
+
 import AlertNote from './AlertNote'
 
 function CardAlerts({ note}) {

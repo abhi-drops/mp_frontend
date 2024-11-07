@@ -13,9 +13,9 @@ const NotesGrid = ({ circleNotes }) => {
   }
 
   return (
-    <div className="w-full grid gap-3 pb-3 grid-cols-1 md:grid-cols-1">
+    <div className="w-full grid gap-3 pb-3 grid-cols-1 md:grid-cols-1 md:mb-10">
     {rows.map((row, rowIndex) => (
-      <div key={rowIndex} className="flex flex-col md:flex-row gap-3">
+      <div key={rowIndex} className="flex flex-col md:flex-row gap-3 md:mb-6 mb-0">
         {row.map((note, index) => (
           <CardNote
             key={note._id || index}

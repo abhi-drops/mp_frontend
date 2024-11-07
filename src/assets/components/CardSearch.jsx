@@ -13,8 +13,7 @@ function CardSearch({ name, icon, userno }) {
       <div className=" flex flex-col w-full ps-3 h-full justify-around">
         <h4>{name}</h4>
         <div className='flex gap-2 items-center justify-end pe-3'>
-          <FaUser />
-          <p>{userno}</p>
+          
         </div>
       </div>
     </div>

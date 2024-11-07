@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import SearchIcon from '../assets/images/BiSearch.svg'
 import CardCircle from '../assets/components/CardCircle'
 import circleicon from '../assets/images/circleicon.svg'
@@ -8,11 +8,15 @@ import CardSearch from '../assets/components/CardSearch'
 import { IoPaperPlaneOutline } from 'react-icons/io5'
 import CardNote from '../assets/components/CardNote'
 import { RiStickyNoteAddLine } from 'react-icons/ri'
-import { addNewNoteAPI, getCircleDataAPI } from '../services/allAPI'
-import { useNavigate, useParams } from 'react-router-dom'
+import { addNewNoteAPI, getCircleDataAPI, getUserDataAPI, joinCircleAPI } from '../services/allAPI'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import CircleAvatarComponent from '../assets/components/CircleAvatarComponent'
 import { Flip, toast, ToastContainer } from 'react-toastify'
 import NotesGrid from '../assets/components/NotesGrid'
+import { FiUsers } from 'react-icons/fi'
+import { HiOutlineViewGridAdd, HiViewGrid } from 'react-icons/hi'
+import UserContext from '../assets/ContextAPI/UserContext'
+import UserAvatarComponent from '../assets/components/UserAvatarComponent'
 
 
 function Circle() {
@@ -21,6 +25,11 @@ function Circle() {
   const navigate = useNavigate();
 
   const [circleData,setCircleData]=useState({})
+
+  const [userResponse, setuserResponse] = useContext(UserContext);
+  console.log("userresponse",userResponse);
+
+  const[change,setChange]=useState(false)
 
 
 
@@ -88,9 +97,61 @@ function Circle() {
     }
   };
 
+  const getUserData = async () => {
+    const reqBody = new FormData();
+    const token = sessionStorage.getItem("token");
+    console.log("Token:", token);
+    if (token) {
+      const reqHeader = {
+        authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+      try {
+        const result = await getUserDataAPI(reqBody, reqHeader);
+        console.log("Get User Data Result:", result);
+        if (result.status === 200) {
+          setuserResponse(result.data);
+        } else {
+          console.log("Get User Data Error:", result.response.data);
+        }
+      } catch (err) {
+        console.log("Get User Data Catch Error:", err);
+      }
+    }
+  };
+
+  const handlejoinCircle = async (e) => {
+    e.preventDefault();
+
+
+      const token = sessionStorage.getItem("token");
+      console.log("Token:", token);
+      if (token) {
+        const reqHeader = {
+          "authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
+        try {
+          const result = await joinCircleAPI( id,reqHeader);
+          console.log("join Circle Result:", result);
+          if (result.status === 200) {
+            toast.success("Circle joined/exited Successfully");
+            setChange(!change)
+          } else {
+            console.log("join/exit Circle Error:", result.response.data);
+          }
+        } catch (err) {
+          console.log("join/exit Circle Catch Error:", err);
+        }
+      }
+
+  };
+
+
   useEffect(()=>{
-      getCircleData()
-  },[])
+    getUserData();
+    getCircleData()
+  },[change])
 
   useEffect(() => {
     console.log("Updated circleData:", circleData);
@@ -125,11 +186,19 @@ function Circle() {
 
         </div>
 
-        <div className="flex gap-3 justify-end items-center px-5 relative bottom-3">
+        <div className="flex gap-3 justify-end items-center px-5 relative bottom-3 ">
 
-          <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center' onClick={()=>document.getElementById('modalMembers').classList.toggle('hidden')} >
 
-            {circleData.circleMembers?.length} Members
+
+          <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center px-2' onClick={()=>document.getElementById('modalMembers').classList.toggle('hidden')} >
+
+            {circleData.circleMembers?.length} <FiUsers className='text-xl'/>
+            </button>
+
+            <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center' onClick={e=>handlejoinCircle(e)} >
+
+            { circleData?.circleMembers?.some(obj => Object.values(obj).includes(userResponse?._id)) ? <HiViewGrid className='text-xl' />
+            : <HiOutlineViewGridAdd className='text-xl'/>}
             </button>
 
 
@@ -145,19 +214,22 @@ function Circle() {
 
               <div className='w-full flex justify-center h-[93%]'>
               <div className=' md:w-[43vw] w-[85vw] mt-10 overflow-y-scroll'>
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
-                <CardSearch name={"Circle Name 1"} icon={circleicon} userno={65} />
+
+                {
+                  circleData?.circleMembers?.map(user=>{
+                    return(
+                      <Link key={user?._id} to={`/userpage/${user?._id}`}>
+                    <div  className="bg-info w-full rounded-lg flex p-4 items-center gap-3 mb-3">
+                    {/* <img src={avatar} alt="" /> */}
+                    <UserAvatarComponent seed={user?.userPic}/>
+                    <p className=' font-semibold text-secondary'>{user?.userName}</p>
+                  </div>
+                  </Link>
+                    )
+                  })
+                }
+
+
               </div>
               </div>
 
@@ -167,13 +239,13 @@ function Circle() {
 
               <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center' >
             <IoPaperPlaneOutline className='text-xl'/>
-            Share
+
             </button>
 
 
             <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center' onClick={()=>document.getElementById('modalAdd').classList.toggle('hidden')} >
             <RiStickyNoteAddLine className='text-xl'/>
-            Add
+
             </button>
 
 
@@ -218,7 +290,7 @@ function Circle() {
         {/* <div className=" bg-gradient-to-b from-primary to-transparent w-full h-5 relative top-6 "></div> */}
 
         {/* cards group*/}
-        <div className="w-[100%] h-[78%] md:h-[76.3%] mt-2  overflow-y-scroll pt-5 bg-secondary md:px-5 ">
+        <div className="w-[100%] h-[78%] md:h-[78.9%] mt-2  overflow-y-scroll pt-5 bg-secondary md:px-5 ">
 
           {/* <div className=' w-full md:flex grid gap-3 pb-3 md:pb-0 md:gap-0  '>
           <CardNote className=" h-[100%]" note="Anyone up for coffee this Saturday? New to the city and looking to meet some people " like="75" />

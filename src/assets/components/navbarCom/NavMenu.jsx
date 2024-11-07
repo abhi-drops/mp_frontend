@@ -45,11 +45,11 @@ function NavMenu() {
           onClick={()=>circleBtn()} >
             <FiUser/>{activeKey === 'home'|| activeKey === 'circle' ? <span className='text-xs font-semibold'>Circles </span> : ""}
             </button>
-
+{/*
           <button  className={` ${activeKey === 'emergencies' ? 'rounded-full p-2 bg-white text-base flex items-center gap-2 text-secondary px-2' : 'outline outline-white rounded-full p-1 text-white text-base hover:scale-105'}  transition-all`}
           onClick={()=>AlertBtn()}>
             <AiOutlineAlert/>{activeKey === 'emergencies' && <span className='text-xs font-semibold'>Alerts </span>}
-            </button>
+            </button> */}
         </div>
 
   )
