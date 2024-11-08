@@ -126,6 +126,7 @@ const handleAddComment = async (e) => {
       const result = await addNoteCommentAPI(noteid, reqBody, reqHeader);
       if (result.status === 200) {
         toast.success("comment added successfully")
+  
       } else {
         toast.warn(result.response.data);
       }
@@ -152,6 +153,7 @@ const handleLikeNote = async (e) => {
       if (result.status === 200) {
         setLike(!like)
         console.log("Liked/unliked successfully")
+
       } else {
         toast.warn(result.response.data);
       }

@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react'
 import { FaTools } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom';
 import { banUserAPI, deleteEventAPI, removeCircleNoteAPI, resolveReportAPI } from '../services/allAPI';
+import { Flip, toast, ToastContainer } from 'react-toastify';
 
 function AdminTools() {
 
@@ -30,12 +31,12 @@ function AdminTools() {
       try {
         const result = await removeCircleNoteAPI(noteId,reqHeader);
         if (result.status === 200) {
-          console.log("event removed successfully")
+          toast.success("event removed successfully")
         } else {
-          console.log(result.response.data);
+          toast.error(result.response.data);
         }
       } catch (err) {
-        console.log(err);
+        toast.error(err);
       }
     }
   };
@@ -62,15 +63,15 @@ function AdminTools() {
         if (result.status === 200) {
           if (status) {
 
-            console.log("banned user successfully")
+            toast.success("banned user successfully")
           }else{
-            console.log("unbanned user successfully")
+            toast.success("unbanned user successfully")
           }
         } else {
-          console.log(result.response.data);
+          toast.error(result.response.data);
         }
       } catch (err) {
-        console.log(err);
+        toast.error(err);
       }
     }
   };
@@ -90,12 +91,12 @@ function AdminTools() {
       try {
         const result = await deleteEventAPI(id,reqHeader);
         if (result.status === 200) {
-          console.log("event removed successfully")
+          toast.success("event removed successfully")
         } else {
-          console.log(result.response.data);
+          toast.error(result.response.data);
         }
       } catch (err) {
-        console.log(err);
+        toast.error(err);
       }
     }
   };
@@ -105,6 +106,19 @@ function AdminTools() {
 
   return (
     <div className='bg-teal-50 w-[100vw] h-[100vh] flex justify-end'>
+      <ToastContainer
+        position="top-left"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Flip}
+      />
 
       <div className=' md:w-[91.5vw] h-[100vh] w-[100vw] flex flex-col p-5'>
 

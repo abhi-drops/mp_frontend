@@ -148,6 +148,7 @@ function UserPage() {
           const result = await editUserDataAPI(reqBody, reqHeader);
           console.log("Edit Profile Result:", result);
           if (result.status === 200) {
+            getUserData(id);
             toast.success("Profile edited Successfully");
             document.getElementById("modalEB").classList.toggle("hidden");
           } else {
@@ -200,6 +201,7 @@ function UserPage() {
       try {
         const result = await editEventNoteAPI(lastEditEventId,reqBody,reqHeader);
         if (result.status === 200) {
+          getUserData(id);
           setNewEvent({
             "eventTitle":"" ,
             "eventDes":"",
@@ -550,7 +552,7 @@ function UserPage() {
 
                       <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center'>
                       <RiStickyNoteAddLine className='text-xl'/>
-                            Add Post
+                            save
                       </button>
                     </div>
 
@@ -593,7 +595,7 @@ function UserPage() {
 
                     <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={(e)=>handleEditEventNote(e)}>
                     <RiStickyNoteAddLine className='text-xl'/>
-                          Add Post
+                          save
                     </button>
                   </div>
 
@@ -630,7 +632,7 @@ function UserPage() {
 
                   <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={(e)=>handleEditCircleNote(e)}>
                   <RiStickyNoteAddLine className='text-xl'/>
-                        Add Post
+                        save
                   </button>
                 </div>
 

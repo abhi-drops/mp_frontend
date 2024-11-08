@@ -157,6 +157,19 @@ function Circle() {
     console.log("Updated circleData:", circleData);
   }, [circleData]);
 
+  const handleCopyUrl = () => {
+    // Create the full URL
+    const fullUrl = `${window.location}`;
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(fullUrl)
+      .then(() => {
+        toast.success("URL copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy URL: ", err);
+      });
+  };
 
 
   return (
@@ -237,7 +250,7 @@ function Circle() {
 
               </div>
 
-              <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center' >
+              <button className='rounded-full p-2 bg-info text-sm font-semibold flex items-center gap-2 text-secondary px-3  flex justify-center items-center' onClick={handleCopyUrl} >
             <IoPaperPlaneOutline className='text-xl'/>
 
             </button>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { TbMessageReport, TbMessageReportFilled } from 'react-icons/tb'
 import { banUserAPI, deleteEventAPI, getReportAPI, removeCircleNoteAPI, resolveReportAPI } from '../services/allAPI';
-import { toast } from 'react-toastify';
+import { Flip, toast, ToastContainer } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 function AdminReport() {
@@ -45,12 +45,12 @@ const handleRemoveCircleNote = async (e,id) => {
     try {
       const result = await removeCircleNoteAPI(id,reqHeader);
       if (result.status === 200) {
-        console.log("event removed successfully")
+        toast.success("event removed successfully")
       } else {
-        console.log(result.response.data);
+        toast.error(result.response.data);
       }
     } catch (err) {
-      console.log(err);
+      toast.error(err);
     }
   }
 };
@@ -70,12 +70,12 @@ const handleDeleteEvent = async (e,id) => {
     try {
       const result = await deleteEventAPI(id,reqHeader);
       if (result.status === 200) {
-        console.log("circle removed successfully")
+        toast.success("circle removed successfully")
       } else {
-        console.log(result.response.data);
+        toast.error(result.response.data);
       }
     } catch (err) {
-      console.log(err);
+      toast.error(err);
     }
   }
 };
@@ -101,15 +101,15 @@ const handleBanUser = async (e,id,status) => {
       if (result.status === 200) {
         if (status) {
 
-          console.log("banned user successfully")
+          toast.success("banned user successfully")
         }else{
-          console.log("unbanned user successfully")
+          toast.success("unbanned user successfully")
         }
       } else {
-        console.log(result.response.data);
+        toast.error(result.response.data);
       }
     } catch (err) {
-      console.log(err);
+      toast.error(err);
     }
   }
 };
@@ -118,13 +118,13 @@ const handleResolveReport = async (e, id) => {
   try {
     const result = await resolveReportAPI(id);
     if (result.status === 200) {
-      console.log("Report resolved successfully:", result.data);
+      toast.success("Report resolved successfully:", result.data);
       getReportData()
     } else {
-      console.error("Failed to resolve report:", result.response?.data || result);
+      toast.error("Failed to resolve report:", result.response?.data || result);
     }
   } catch (err) {
-    console.error("Error resolving report:", err.response?.data || err);
+    toast.error("Error resolving report:", err.response?.data || err);
   }
 };
 
@@ -135,6 +135,19 @@ function SignOut() {
 
   return (
     <div className='bg-teal-50 w-[100vw] h-[100vh] flex justify-end overflow-x-hidden'>
+      <ToastContainer
+        position="top-left"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Flip}
+      />
 
       <div className=' md:w-[91.5vw] h-[100vh] w-[100vw] flex flex-col p-5'>
 
