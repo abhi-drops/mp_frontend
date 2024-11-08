@@ -13,9 +13,9 @@ import { CgUserList } from 'react-icons/cg';
 import { IoPaperPlane, IoPaperPlaneOutline } from 'react-icons/io5';
 import { FiAlertTriangle } from 'react-icons/fi';
 import { RxCross2 } from 'react-icons/rx';
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { BiMessageSquareAdd } from 'react-icons/bi'
-import { editCircleNoteAPI, editEventNoteAPI, editUserDataAPI, followUserAPI, getUserDataAPI } from '../services/allAPI'
+import { addReportAPI, editCircleNoteAPI, editEventNoteAPI, editUserDataAPI, followUserAPI, getUserDataAPI } from '../services/allAPI'
 import UserAvatarComponent from '../assets/components/UserAvatarComponent'
 import { Flip, toast, ToastContainer } from "react-toastify";
 
@@ -51,6 +51,8 @@ function UserPage() {
     "noteTitle":"" ,
     "noteDes":"",
   })
+  const location = useLocation();
+  const [report,setReport]=useState("")
 
   async function randomizeAvatarIcon() {
     setNewUserIconSeed(Math.floor(100000 + Math.random() * 900000));
@@ -279,6 +281,57 @@ function UserPage() {
     }
   };
 
+  const handleAddReport = async (e) => {
+    e.preventDefault();
+
+    if ( report == "" ) {
+      toast.info("Please fill the missing field");
+    } else {
+      const reqBody = new FormData();
+      reqBody.append("reportType", "user");
+      reqBody.append("reportAgainstUserId", userData._id);
+      reqBody.append("reportNoteId", "");
+      reqBody.append("reportEventId", "");
+      reqBody.append("reportDetails", report);
+      const token = sessionStorage.getItem("token");
+      console.log("Token:", token);
+      if (token) {
+        const reqHeader = {
+          authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
+        try {
+          const result = await addReportAPI(reqBody, reqHeader);
+          console.log("Add report Result:", result);
+          if (result.status === 200) {
+            toast.success("Report Added Successfully");
+            document.getElementById("modalAdd").classList.toggle("hidden");
+            setReport("");
+
+          } else {
+            console.log("Add Report Error:", result.response.data);
+          }
+        } catch (err) {
+          console.log("Add Report Catch Error:", err);
+        }
+      }
+    }
+  };
+
+  const handleCopyUrl = () => {
+    // Create the full URL
+    const fullUrl = `${window.location.origin}/userpage/${userData._id}`;
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(fullUrl)
+      .then(() => {
+        toast.success("URL copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy URL: ", err);
+      });
+  };
+
 
 
 
@@ -393,11 +446,11 @@ function UserPage() {
 
 
                 <div id='reportbox' className=' bg-info w-full rounded-lg flex flex-col gap-3 mt-5 p-3 h-full'>
-                  <textarea name="" id="" className='w-full outline-none bg-transparent rounded-lg h-full' placeholder='write the issue in short ....'></textarea>
+                  <textarea value={report} onChange={(e)=>setReport(e.target.value)} name="" id="" className='w-full outline-none bg-transparent rounded-lg h-full' placeholder='write the issue in short ....'></textarea>
 
                   <div className="flex w-full justify-end">
 
-                    <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' >
+                    <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={(e)=>handleAddReport(e)} >
                           <BiMessageSquareAdd className='text-xl'/>
                           Add Report
                     </button>
@@ -646,13 +699,13 @@ function UserPage() {
 
 
           <div className='w-full justify-center items-center h-full flex'>
-            <button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center h-10 w-28'  >
+            <button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center h-10 w-28'  onClick={handleCopyUrl}  >
               <IoPaperPlaneOutline className='text-base'/> <p className='text-xs'>Share</p>
             </button>
           </div>
 
           <div className='w-full justify-center items-center h-full flex'>
-            <button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center h-10 w-32' onClick={()=>document.getElementById('modalreport').classList.toggle('hidden')}  >
+            <button disabled={id && id === "1"} className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center h-10 w-32 disabled:opacity-30' onClick={()=>document.getElementById('modalreport').classList.toggle('hidden')}  >
               <FiAlertTriangle className='text-base'/> <p className='text-xs'>Report</p>
             </button>
           </div>

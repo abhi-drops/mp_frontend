@@ -39,7 +39,14 @@ function Auth({register}) {
             sessionStorage.setItem("token",result.data.token)
             setUserData({userName:"",userPassword:""})
             setUserResponse(result.data.updatedUser)
-            navigate(`/`)
+            if (result.data.updatedUser.isUserAdmin) {
+              console.log("is admin");
+
+              navigate(`/adminhome`)
+            }else{
+
+              navigate(`/`)
+            }
           }else{
             toast.warning(result.response.data)
           }

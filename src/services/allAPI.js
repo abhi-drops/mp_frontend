@@ -98,3 +98,31 @@ export const editCircleNoteAPI = async(id,reqBody,reqHeader)=>{
 export const followUserAPI =async(reqBody,reqHeader)=>{
   return await commonAPI("POST",`${server_url}/followUser`,reqBody,reqHeader)
 }
+
+export const getTotalCountAPI =async(reqBody,reqHeader)=>{
+  return await commonAPI("POST",`${server_url}/getTotalCount`,reqBody,reqHeader)
+}
+
+export const addReportAPI =async(reqBody,reqHeader)=>{
+  return await commonAPI("POST",`${server_url}/addReport`,reqBody,reqHeader)
+}
+
+export const getReportAPI =async()=>{
+  return await commonAPI("GET",`${server_url}/getReport`)
+}
+
+export const removeCircleNoteAPI = async (id, reqHeader) => {
+  return await commonAPI('PUT', `${server_url}/removeCircleNote/${id}`, {}, reqHeader); // Pass `null` for reqBody
+};
+
+export const deleteEventAPI = async (id, reqHeader) => {
+  return await commonAPI('PUT', `${server_url}/deleteEvent/${id}`, {}, reqHeader); // Pass `null` for reqBody
+};
+
+export const banUserAPI = async(reqBody,reqHeader)=>{
+  return await commonAPI('PUT',`${server_url}/banUser`,reqBody,reqHeader)
+}
+
+export const resolveReportAPI = async (id) => {
+  return await commonAPI("PUT", `${server_url}/resolveReport/${id}`,{});
+};

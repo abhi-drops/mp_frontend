@@ -6,7 +6,7 @@ import { FiAlertTriangle } from 'react-icons/fi'
 import { IoPaperPlaneOutline } from 'react-icons/io5'
 import { BiMessageSquare, BiMessageSquareAdd } from 'react-icons/bi'
 import { useParams } from 'react-router-dom'
-import { addEventCommentAPI, addEventLikeAPI, getEventDataAPI } from '../../services/allAPI'
+import { addEventCommentAPI, addEventLikeAPI, addReportAPI, getEventDataAPI } from '../../services/allAPI'
 import UserContext from '../ContextAPI/UserContext'
 import { toast } from 'react-toastify'
 import { BsHeartFill } from 'react-icons/bs'
@@ -22,6 +22,8 @@ function EventNote({event}) {
   let { eventid } = useParams();
 
   const [eventData,setEventData]=useState({})
+
+  const [report,setReport]=useState("")
 
   useEffect(() => {
     console.log("eventid:",eventid," event-id : ",event._id);
@@ -127,6 +129,43 @@ const handleLikeNote = async (e) => {
   }
 };
 
+const handleAddReport = async (e) => {
+  e.preventDefault();
+
+  if ( report == "" ) {
+    toast.info("Please fill the missing field");
+  } else {
+    const reqBody = new FormData();
+    reqBody.append("reportType", "event");
+    reqBody.append("reportAgainstUserId", "");
+    reqBody.append("reportNoteId", "");
+    reqBody.append("reportEventId", eventData?._id);
+    reqBody.append("reportDetails", report);
+    const token = sessionStorage.getItem("token");
+    console.log("Token:", token);
+    if (token) {
+      const reqHeader = {
+        authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+      try {
+        const result = await addReportAPI(reqBody, reqHeader);
+        console.log("Add report Result:", result);
+        if (result.status === 200) {
+          toast.success("Report Added Successfully");
+          document.getElementById("modalAdd").classList.toggle("hidden");
+          setReport("");
+
+        } else {
+          console.log("Add Report Error:", result.response.data);
+        }
+      } catch (err) {
+        console.log("Add Report Catch Error:", err);
+      }
+    }
+  }
+};
+
 
 
 
@@ -159,12 +198,12 @@ const handleLikeNote = async (e) => {
                   Report
             </button>
 
-            {/* show alert as "copied to clipboard" when share button is pressed */}
+            {/* show alert as "copied to clipboard" when share button is pressed
 
             <button className='rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center'>
                   <IoPaperPlaneOutline className='text-xl'/>
                   Share
-            </button>
+            </button> */}
 
             </div>
           </div>
@@ -174,11 +213,11 @@ const handleLikeNote = async (e) => {
 
 
         <div id='reportbox' className='hidden bg-info w-full rounded-lg flex flex-col gap-3 mt-5 p-3'>
-            <textarea name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='write the issue in short ....'></textarea>
+            <textarea value={report} onChange={(e)=>setReport(e.target.value)} name="" id="" className='w-full outline-none bg-transparent rounded-lg ' placeholder='write the issue in short ....'></textarea>
 
             <div className="flex w-full justify-end">
 
-              <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' >
+              <button className='h-9 rounded-full p-2 bg-secondary text-sm font-semibold flex items-center gap-2 text-info px-3  flex justify-center items-center' onClick={(e)=>handleAddReport(e)} >
                     <BiMessageSquareAdd className='text-xl'/>
                     Add Report
               </button>
