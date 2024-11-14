@@ -53,6 +53,7 @@ function Auth({register}) {
 
         } catch (error) {
           console.log(error);
+          toast.warning('Server connection error: Due to the use of a free server,sometimes it may take up to 30 seconds for the connection to establish after the website initially launches.')
         }
       }
     }

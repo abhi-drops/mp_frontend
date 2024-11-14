@@ -47,8 +47,7 @@ function Note({noteId,circleId}) {
   userResponse?._id ? setLike(noteData.noteLikedUsers?.includes(userResponse?._id)):""
   console.log("like:",like);
 
-
- },[noteData])
+ },[noteData,userResponse])
 
 
   const getNoteData = async () => {
@@ -125,8 +124,10 @@ const handleAddComment = async (e) => {
     try {
       const result = await addNoteCommentAPI(noteid, reqBody, reqHeader);
       if (result.status === 200) {
+        setNewComment("")
+        getNoteData()
         toast.success("comment added successfully")
-  
+
       } else {
         toast.warn(result.response.data);
       }
@@ -153,6 +154,7 @@ const handleLikeNote = async (e) => {
       if (result.status === 200) {
         setLike(!like)
         console.log("Liked/unliked successfully")
+
 
       } else {
         toast.warn(result.response.data);

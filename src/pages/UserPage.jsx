@@ -272,7 +272,7 @@ function UserPage() {
       try {
         const result = await followUserAPI(reqBody,reqHeader);
         if (result.status === 200) {
-          toast.success("user followed/unfollowed successfully")
+          console.log("user followed/unfollowed successfully")
           getUserData(id)
         } else {
           toast.warn(result.response.data);

@@ -54,6 +54,7 @@ function Events() {
           const result = await addNewEventAPI(reqBody, reqHeader);
           console.log("Add Event Result:", result);
           if (result.status === 200) {
+            getEventsData()
             toast.success("Event Added Successfully");
             document.getElementById("modalAdd").classList.toggle("hidden");
             setNewEvent({

@@ -37,6 +37,10 @@ function MyCircles() {
     e.preventDefault();
     if (newCircleName === "") {
       toast.info("Please fill the missing field");
+    }else if (sessionStorage.getItem("selectedCityId") == null) {
+
+     toast.warning("select the city first!")
+
     } else {
       const reqBody = new FormData();
       reqBody.append("circleName", newCircleName);
@@ -50,6 +54,8 @@ function MyCircles() {
           "Content-Type": "application/json",
         };
         try {
+
+
           const result = await addnewcircleAPI(reqBody, reqHeader);
           console.log("Add Circle Result:", result);
           if (result.status === 200) {
@@ -58,10 +64,10 @@ function MyCircles() {
             setNewCircleName("");
             setUpdateUser(!updatedUser)
           } else {
-            console.log("Add Circle Error:", result.response.data);
+            toast.error("Add Circle Error:", result.response.data);
           }
         } catch (err) {
-          console.log("Add Circle Catch Error:", err);
+          toast.error("Add Circle Catch Error:", err);
         }
       }
     }
@@ -263,7 +269,7 @@ function MyCircles() {
 
 
           {/* Cards Group */}
-<div className="w-[100%] h-[82%] mt-2 xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 grid gap-3 overflow-y-scroll pt-5">
+<div className="w-[100%] h-[82%] mt-2  lg:grid-cols-3  md:grid flex flex-col gap-3 overflow-y-scroll pt-5">
   {sessionStorage.getItem("selectedCityId") ? (
     userResponse.userCircles.filter(
       (circle) => circle.circleCityId === sessionStorage.getItem("selectedCityId")

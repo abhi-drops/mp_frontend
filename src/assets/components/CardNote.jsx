@@ -10,7 +10,6 @@ function CardNote({ note }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-
     // fetchNoteData();
   }, [note._id]); // Dependency on note._id ensures data fetch on each note change
 
@@ -47,7 +46,7 @@ function CardNote({ note }) {
 
           <div className="md:w-2/4 md:h-5/6 w-full h-full bg-success md:rounded-lg   overflow-y-scroll overflow-x-hidden pt-20 pb-5 px-5">
 
-            <Note key={note._id} noteId={note._id} circleId={note.circleId} />
+            <Note key={note._id} noteId={note._id} circleId={note.circleId}  />
 
           </div>
 

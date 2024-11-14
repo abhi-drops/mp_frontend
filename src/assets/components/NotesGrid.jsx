@@ -1,7 +1,7 @@
 import React from 'react';
 import CardNote from './CardNote';
 
-const NotesGrid = ({ circleNotes }) => {
+const NotesGrid = ({ circleNotes,getCircleData }) => {
 
 
   const columns = 2; // Adjust this to control the number of columns per row
@@ -21,6 +21,7 @@ const NotesGrid = ({ circleNotes }) => {
             key={note._id || index}
             className="h-full w-full"
             note={note}
+            getCircleData
           />
         ))}
       </div>

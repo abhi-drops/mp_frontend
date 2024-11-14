@@ -79,6 +79,7 @@ function Circle() {
           const result = await addNewNoteAPI(reqBody, reqHeader);
           console.log("Add Note Result:", result);
           if (result.status === 200) {
+            getCircleData()
             toast.success("Note Added Successfully");
             document.getElementById("modalAdd").classList.toggle("hidden");
             setNewNote({
@@ -135,7 +136,7 @@ function Circle() {
           const result = await joinCircleAPI( id,reqHeader);
           console.log("join Circle Result:", result);
           if (result.status === 200) {
-            toast.success("Circle joined/exited Successfully");
+            console.log("Circle joined/exited Successfully");
             setChange(!change)
           } else {
             console.log("join/exit Circle Error:", result.response.data);
@@ -310,7 +311,7 @@ function Circle() {
           <CardNote className=" h-[100%]" note="Looking for a part-time web developer. DM me for details!" like="5" />
           </div> */}
           <div className=' w-full md:flex grid gap-3 pb-3 md:pb-0 md:gap-0  '>
-          <NotesGrid circleNotes={circleData.circleNotes || []} />
+          <NotesGrid circleNotes={circleData.circleNotes || []} getCircleData />
           </div>
 
         </div>

@@ -93,6 +93,8 @@ const handleAddComment = async (e) => {
     try {
       const result = await addEventCommentAPI(eventid, reqBody, reqHeader);
       if (result.status === 200) {
+        getEventData()
+        setNewComment("")
         toast.success("comment added successfully")
       } else {
         toast.warn(result.response.data);
