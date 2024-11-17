@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "serve": "serve -l 4433 dist",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -14,6 +15,7 @@
     "@dicebear/converter": "^9.2.2",
     "@dicebear/core": "^9.2.2",
     "axios": "^1.7.7",
+    "https-localhost": "^4.7.1",
     "mp_frontend": "file:",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
