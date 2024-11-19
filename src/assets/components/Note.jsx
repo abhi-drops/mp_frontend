@@ -309,7 +309,8 @@ const handleCopyUrl = () => {
           <div key={index} className="w-full bg-info rounded-lg flex flex-col p-5 mt-5">
 
                 <div  className="flex gap-2 items-center">
-              <img src={useravatar} alt="" />
+              {/* <img src={useravatar} alt="" /> */}
+              <UserAvatarComponent seed={comment.commentedUserPic}/>
               <p className='text-sm font-semibold'>{comment.commentedUserName}</p>
             </div>
 
