@@ -32,6 +32,7 @@ function Auth({register}) {
         // alert("proceed to api call")
 
         try {
+          toast.warning('warning : Due to the use of a free server,sometimes it may take up to 30 seconds for the connection to establish after the website initially launches.')
           const result = await loginAPI({userName,userPassword})
           console.log(result);
           if (result.status === 200) {
@@ -75,6 +76,7 @@ function Auth({register}) {
         // alert("proceed to api call")
 
         try {
+          toast.warning('warning : Due to the use of a free server,sometimes it may take up to 30 seconds for the connection to establish after the website initially launches.')
           const result = await registerAPI(userData)
           console.log(result);
           if (result.status === 200) {
